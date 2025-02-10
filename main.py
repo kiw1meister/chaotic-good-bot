@@ -9,7 +9,14 @@ class Client(discord.Client):
         print(f'Logged in as {self.user}.')
     
     async def on_message(self, message):
-        print(f'Message from {message.author}: {message.content}')
+        # Prevents bot from replying to itself
+        if message.author == self.user:
+            return
+        
+        if message.content.startswith('yo'):
+            print(f'Message from {message.author}: {message.content}')
+            await message.channel.send(f'Yo {message.author.name}')
+
 
 intents = discord.Intents.default()
 intents.message_content = True
