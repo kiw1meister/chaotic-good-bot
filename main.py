@@ -50,4 +50,8 @@ async def sayHello(interaction: discord.Interaction):
 async def displayServerID(interaction: discord.Interaction):
     await interaction.response.send_message(f"{serverID}")
 
+@client.tree.command(name='printer', description="This parrots the user!", guild=GUILD_ID)
+async def printer(interaction: discord.Interaction, printer: str):
+    await interaction.response.send_message(printer)
+
 client.run(os.getenv('TOKEN'))
