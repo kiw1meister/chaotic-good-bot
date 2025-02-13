@@ -1,12 +1,22 @@
 import discord
+from discord.ext import commands
+from discord import app_commands
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-class Client(discord.Client):
+class Client(commands.Bot):
     async def on_ready(self):
         print(f'Logged in as {self.user}.')
+
+        # Force sync test server
+        try:
+            guild = discord.Object(id=int(serverID))
+            synced = await self.tree.sync(guild=guild)
+            print(f'Synced {len(synced)} command(s) to server {guild.id}')
+        except Exception as e:
+            print(f'Error syncing commands: {e}')
     
     async def on_message(self, message):
         # Prevents bot from replying to itself
@@ -23,6 +33,21 @@ class Client(discord.Client):
 
 intents = discord.Intents.default()
 intents.message_content = True
+# Command prefix can be anything as Discord is trying to deprecate command prefixes in favor of using slash commands
+client = Client(command_prefix="!", intents=intents)
 
-client = Client(intents=intents)
+# Server ID to locally test one server
+serverID = os.getenv('SERVER')
+GUILD_ID = discord.Object(id=int(serverID))
+
+print(f"Test server ID: {serverID}")  # Debugging line
+
+@client.tree.command(name='hello', description="This just says hello!", guild=GUILD_ID)
+async def sayHello(interaction: discord.Interaction):
+    await interaction.response.send_message("Hello!")
+
+@client.tree.command(name='displayserverid', description="This displays the server ID", guild=GUILD_ID)
+async def displayServerID(interaction: discord.Interaction):
+    await interaction.response.send_message(f"{serverID}")
+
 client.run(os.getenv('TOKEN'))
